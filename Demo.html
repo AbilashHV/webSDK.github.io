@@ -1,0 +1,111 @@
+<!-- <head>
+	<title>Demo for webSDK</title>
+</head>
+<body>
+	<h1>Demo for webSDK</h1>
+	<button type="button">Click Me!</button>
+</body> -->
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://hv-camera-web-sg.s3-ap-southeast-1.amazonaws.com/hyperverge-web-sdk@4.1.6/src/sdk.min.js"></script>
+    
+  </head>
+  <body>
+    <center><h2>Hyperverge WebSDK Demo</h2></center>
+    <div class="container">
+      <div class="form-group">
+        <button type="button" onclick="runOCR();" class="btn btn-primary">Run OCR</button>
+        <button type="button" onclick="runLiveness();" class="btn btn-primary">Run Face Liveness</button>
+		<button type="button" onclick="runFaceMatch();" class="btn btn-primary">Run Face Match</button>     
+	   </div>
+      <div id="div1"></div>
+    </div>
+    <script>
+      // client calls the auth api to get the token from their backend server
+      var jwtToken = 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJZCI6IjBlYzEzYyIsImhhc2giOiJiMzRkNTdiNTU0ZDdkNTZmNDlmODNjMDgzZTI3YzhhZGVmOWI0NjczMjYyMzQ2MzNkMmJlMGQ2NTAzYTY5NGVmIiwiaWF0IjoxNjczOTUxNDU5LCJleHAiOjE2NzM5NTc0NTksImp0aSI6IjFmYjlkMWY2LTM3MjctNGUwMS05M2Y5LTk4NmViMWEyNjM5NSJ9.YEZYV4Jvu1WIkY1DAvoB_OlojMaMxlGKCIpoR5PE5D4xO80Gq4RQ2u4clEeCTPDoM4atsy853YJ_L4uOExaU3aS3GS3cdUo9OISL2TEooN3mvbsZSsoned-BG_4hbBA5CkUNsbLyw_HZesjOayN1Kpeg5_AcIzoo3HabimedWs8'
+      HyperSnapSDK.init(jwtToken, HyperSnapParams.Region.India);
+      HyperSnapSDK.startUserSession();
+      var faceImage = '';
+      var docImage = '';
+      function runOCR() {
+        hvDocConfig = new HVDocConfig();
+        hvDocConfig.setOCRDetails(
+          'https://ind-docs.hyperverge.co/v2.0/readKYC',
+          hvDocConfig.DocumentSide.FRONT,
+          { },
+          { },
+        );
+        hvDocConfig.setShouldShowInstructionPage(true);
+		hvDocConfig.setChooseDocumentCaptureOption(true);
+        HVDocsModule.start(hvDocConfig, callback_First);
+      }
+      function runLiveness() {
+        hvFaceConfig = new HVFaceConfig();
+        hvFaceConfig.setShouldShowInstructionPage(true);
+        hvFaceConfig.setLivenessAPIParameters({
+          rejectFaceMask: 'yes',
+          allowEyesClosed: 'no',
+          allowMultipleFaces: 'no',
+        });
+        HVFaceModule.start(hvFaceConfig, callback_second);
+      }
+      callback_First = (HVError, HVResponse) => {
+        if (HVError) {
+          var para = document.createElement('p');
+          var node = document.createTextNode(JSON.stringify(HVError));
+          para.appendChild(node);
+          var element = document.getElementById('div1');
+          element.appendChild(para);
+        } else {
+          var para = document.createElement('p');
+          var node = document.createTextNode(JSON.stringify(HVResponse));
+          para.appendChild(node);
+          var element = document.getElementById('div1');
+          element.appendChild(para);
+          var DocimageBase64 = HVResponse.getImageBase64();
+          docImage = DocimageBase64
+        }
+      };
+      callback_second = (HVError, HVResponse) => {
+        if (HVError) {
+          var para = document.createElement('p');
+          var node = document.createTextNode(JSON.stringify(HVError));
+          para.appendChild(node);
+          var element = document.getElementById('div1');
+          element.appendChild(para);
+        } else {
+          var para = document.createElement('p');
+          var node = document.createTextNode(JSON.stringify(HVResponse));
+          para.appendChild(node);
+          var element = document.getElementById('div1');
+          element.appendChild(para);
+          var DocimageBase64 = HVResponse.getImageBase64();
+          faceImage = DocimageBase64
+        }
+          
+        }
+      callback = (HVError, HVResponse) => {
+        if (HVError) {
+          var para = document.createElement('p');
+          var node = document.createTextNode(JSON.stringify(HVError));
+          para.appendChild(node);
+          var element = document.getElementById('div1');
+          element.appendChild(para);
+        } else {
+          var para = document.createElement('p');
+          var node = document.createTextNode(JSON.stringify(HVResponse));
+          para.appendChild(node);
+          var element = document.getElementById('div1');
+          element.appendChild(para);
+          
+        }
+      };
+        function runFaceMatch(){
+        HVNetworkHelper.makeFaceMatchCall(faceImage,docImage, {}, {}, callback);
+
+      }
+      
+    </script>
+  </body>
+</html>
